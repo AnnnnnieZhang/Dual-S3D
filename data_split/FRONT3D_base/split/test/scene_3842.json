@@ -1,0 +1,27 @@
+[
+    [
+        "test/rgb/000751_rgb_003842.jpeg",
+        "1",
+        "table"
+    ],
+    [
+        "test/rgb/000751_rgb_003842.jpeg",
+        "0",
+        "sofa"
+    ],
+    [
+        "test/rgb/000751_rgb_003842.jpeg",
+        "4",
+        "table"
+    ],
+    [
+        "test/rgb/000751_rgb_003842.jpeg",
+        "3",
+        "chair"
+    ],
+    [
+        "test/rgb/000751_rgb_003842.jpeg",
+        "2",
+        "table"
+    ]
+]
