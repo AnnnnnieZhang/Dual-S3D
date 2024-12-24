@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 ## Dataset Preparation
 
-We use the 3D-FRONT dataset as the main data source for training and testing.
+We use the **3D-FRONT** dataset as the main data source for training and testing.
 
 **Dataset Reference**:
 ```bibtex
@@ -54,18 +54,18 @@ We use the 3D-FRONT dataset as the main data source for training and testing.
   year={2020}
 }
 ```
-**Dataset Split**
+**Dataset Split**  
 The texture reconstruction results are shown below:
 
-![Dataset Split](readme/datasets.png)
+<img src="readme/datasets.png" alt="Dataset Split" width="400">
 
 
 **Download and Extraction**
 Download the dataset from the following link:
 
-The dataset can be downloaded from: https://drive.google.com/file/d/1j0n4J7XBqK1np5v7sxZGKBhqMg6qTG4Y/view
+The dataset can be downloaded from: [3DFRONT](https://drive.google.com/file/d/1j0n4J7XBqK1np5v7sxZGKBhqMg6qTG4Y/view)
 
-After downloading, extract it to the data folder in the project root directory.
+After downloading, extract it to the 'data' folder in the project root directory.
 
 ## Depth Prior Generation
 Before geometry and texture reconstruction, each image in the dataset requires a corresponding depth prior image. The following command shows how to run the depth prior generator:
@@ -99,9 +99,8 @@ python inference.py --config train.yaml
 ```
 
 ## Evaluation
+
 The project provides evaluation on the following metrics:
---Chamfer Distance
---F-score
---Normal Consistency
---PSNR
---IoU
+
+| Metrics            | Chamfer Distance | F-score | Normal Consistency | PSNR | IoU |
+|--------------------|------------------|---------|---------------------|------|-----|
