@@ -5,11 +5,11 @@ DF3D is a deep learning framework designed for single-view 3D reconstruction. Th
 
 ---
 
-## Pipeline
+## Workflow
 
 The pipeline of DF3D is shown below:
 
-![Pipeline](readme/ML_Visuhttps.png)
+![Workflow](readme/ML_Visuhttps.png)
 
 ---
 
@@ -54,6 +54,12 @@ We use the 3D-FRONT dataset as the main data source for training and testing.
   year={2020}
 }
 ```
+**Dataset Split**
+The texture reconstruction results are shown below:
+
+![Dataset Split](readme/datasets.png)
+
+
 **Download and Extraction**
 Download the dataset from the following link:
 
