@@ -1,22 +1,3 @@
-# Copyright 2023 Bingxin Ke, ETH Zurich. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# --------------------------------------------------------------------------
-# If you find this code useful, we kindly ask you to cite our paper in your work.
-# Please find bibtex at: https://github.com/prs-eth/Marigold#-citation
-# More information about the method can be found at https://marigoldmonodepth.github.io
-# --------------------------------------------------------------------------
-
 
 from functools import partial
 from typing import Optional, Tuple
@@ -51,40 +32,7 @@ def ensemble_depth(
     tol: float = 1e-3,
     max_res: int = 1024,
 ) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
-    """
-    Ensembles depth maps represented by the `depth` tensor with expected shape `(B, 1, H, W)`, where B is the
-    number of ensemble members for a given prediction of size `(H x W)`. Even though the function is designed for
-    depth maps, it can also be used with disparity maps as long as the input tensor values are non-negative. The
-    alignment happens when the predictions have one or more degrees of freedom, that is when they are either
-    affine-invariant (`scale_invariant=True` and `shift_invariant=True`), or just scale-invariant (only
-    `scale_invariant=True`). For absolute predictions (`scale_invariant=False` and `shift_invariant=False`)
-    alignment is skipped and only ensembling is performed.
-
-    Args:
-        depth (`torch.Tensor`):
-            Input ensemble depth maps.
-        scale_invariant (`bool`, *optional*, defaults to `True`):
-            Whether to treat predictions as scale-invariant.
-        shift_invariant (`bool`, *optional*, defaults to `True`):
-            Whether to treat predictions as shift-invariant.
-        output_uncertainty (`bool`, *optional*, defaults to `False`):
-            Whether to output uncertainty map.
-        reduction (`str`, *optional*, defaults to `"median"`):
-            Reduction method used to ensemble aligned predictions. The accepted values are: `"mean"` and
-            `"median"`.
-        regularizer_strength (`float`, *optional*, defaults to `0.02`):
-            Strength of the regularizer that pulls the aligned predictions to the unit range from 0 to 1.
-        max_iter (`int`, *optional*, defaults to `2`):
-            Maximum number of the alignment solver steps. Refer to `scipy.optimize.minimize` function, `options`
-            argument.
-        tol (`float`, *optional*, defaults to `1e-3`):
-            Alignment solver tolerance. The solver stops when the tolerance is reached.
-        max_res (`int`, *optional*, defaults to `1024`):
-            Resolution at which the alignment is performed; `None` matches the `processing_resolution`.
-    Returns:
-        A tensor of aligned and ensembled depth maps and optionally a tensor of uncertainties of the same shape:
-        `(1, 1, H, W)`.
-    """
+  
     if depth.dim() != 4 or depth.shape[1] != 1:
         raise ValueError(f"Expecting 4D tensor of shape [B,1,H,W]; got {depth.shape}.")
     if reduction not in ("mean", "median"):

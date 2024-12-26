@@ -1,6 +1,6 @@
 resume: false                           # if true resume training, start_epoch is the last epoch
 finetune: False                         # if true set start_epoch is 0
-method: ssr                            # use the trainer
+method: DF3D                            # use the trainer
 exp_name: front3d_ckpt                   # experiment name
 save_root_path: ./output                # save path = os.path.join(save_root_path, exp_name)
 weight: output/front3d_ckpt/model_latest.pth

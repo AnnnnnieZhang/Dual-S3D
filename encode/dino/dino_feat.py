@@ -18,9 +18,9 @@ transform = transforms.Compose([
 
 # 加载数据集
 root_dirs = [
-    '/home/data/luoxi/SSR/data/FRONT3D/train/rgb',
-    '/home/data/luoxi/SSR/data/FRONT3D/test/rgb',
-    '/home/data/luoxi/SSR/data/FRONT3D/val/rgb'
+    'data/FRONT3D/train/rgb',
+    'data/FRONT3D/test/rgb',
+    'SSR/data/FRONT3D/val/rgb'
 ]
 dataset = UnlabeledImageDataset(root_dirs, transform=transform)
 

@@ -352,9 +352,9 @@ def load_device(cfg):
 
 
 def get_model(cfg,device):
-    if cfg['method']=="ssr":
-        from decode.network import SSRNet
-        model=SSRNet(cfg)
+    if cfg['method']=="DF3D":
+        from decode.network import Net
+        model=Net(cfg)
     else:
         raise NotImplementedError
     if cfg['model']['stop_encoder_grad']:
@@ -364,7 +364,7 @@ def get_model(cfg,device):
 
 
 def get_loss(cfg, mode):
-    if cfg['method']=="ssr":
+    if cfg['method']=="DF3D":
         from net.loss import MonoSDFLoss
         loss=MonoSDFLoss(cfg, mode)
     else:
@@ -380,7 +380,7 @@ def get_dataloader(cfg,mode,unlabel=False):
 
 
 def get_trainer(config):
-    if config["method"]=="ssr":
+    if config["method"]=="DF3D":
         from .trainer import Recon_trainer
         trainer=Recon_trainer
     else:

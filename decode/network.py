@@ -16,7 +16,7 @@ from train.train_utils import repeat_interleave
 from encode.attention import Attention_RoI_Module
 from encode.dino.dino_mlp import QuickMLP
 
-class SSRNet(torch.nn.Module):                                                 # modify from MonoSDFNetwork
+class Net(torch.nn.Module):                                                 # modify from MonoSDFNetwork
     def __init__(self, conf):
         """
         :param conf PyHocon config subtree 'model'

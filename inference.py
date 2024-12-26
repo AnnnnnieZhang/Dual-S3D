@@ -4,9 +4,9 @@ import argparse
 import cv2
 import torch
 
-from utils.plots import *
-from configs.config_utils import CONFIG
-from ssr.ssr_utils.utils import load_device, get_model, get_dataloader, CheckpointIO, load_checkpoint
+from utils.model_utils.plots import *
+from utils.config_utils.config_utils import CONFIG
+from train.train_utils import load_device, get_model, get_dataloader, CheckpointIO, load_checkpoint
 
 dirname = os.path.dirname(cv2.__file__)
 plugin_path = os.path.join(dirname, 'plugins', 'platforms')
