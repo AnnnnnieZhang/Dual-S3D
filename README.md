@@ -75,15 +75,6 @@ python -m depth_pri.run --input_img_path  --Output_img_path
 ```
 Please ensure that all images in your dataset have their corresponding depth prior maps before proceeding.
 
-Reference:
-```bibtex
-@InProceedings{ke2023repurposing,
-title={Repurposing Diffusion-Based Image Generators for Monocular Depth Estimation},
-author={Bingxin Ke and Anton Obukhov and Shengyu Huang and Nando Metzger and Rodrigo Caye Daudt and Konrad Schindler},
-booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-year={2024}
-}
-```
 
 ## Training
 Run the following command to start training:
