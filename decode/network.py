@@ -14,8 +14,44 @@ from net.sample import ErrorBoundSampler, UniformSampler
 from utils.model_utils import render_utils, sdf_utils
 from train.train_utils import repeat_interleave
 from encode.attention import Attention_RoI_Module
-from encode.dino.dino_mlp import QuickMLP
 
+
+
+class GlobalEncoder(nn.Module):
+    def __init__(self):
+        super(GlobalEncoder, self).__init__()
+        # 获取MambaVision模型的第三和第四阶段
+        model = AutoModel.from_pretrained("nvidia/MambaVision-B-1K", trust_remote_code=True)
+        self.mamba_stage3 = model.model.levels[2]  # 第三阶段
+        self.mamba_stage4 = model.model.levels[3]  # 第四阶段
+        
+        # 定义downsample，将输入从256维升到512维
+        self.downsample = nn.Conv2d(256, 512, kernel_size=3, stride=2, padding=1, bias=False)
+
+        # 定义全连接层，将1024维特征缩减到256维
+        self.fc = nn.Sequential(
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU()
+        )
+
+    def forward(self, x):
+        # 在进入第三阶段之前升维
+        x = self.downsample(x)  # [batch_size, 512, reduced_height, reduced_width]
+
+        # 进入第三阶段和第四阶段特征提取
+        x = self.mamba_stage3(x)[0]  # 进入第三阶段特征提取
+        x = self.mamba_stage4(x)[0]  # 进入第四阶段特征提取
+        
+        # 对第4阶段特征做池化处理
+        pooled_features = nn.AdaptiveAvgPool2d((1, 1))(x)  # [batch_size, 1024, 1, 1]
+        flattened = torch.flatten(pooled_features, 1)  # 展平成 [batch_size, 1024]
+        
+        # 全连接层将特征从1024维缩减到256维
+        output = self.fc(flattened)  # [batch_size, 256]
+        return output
+    
 class Net(torch.nn.Module):                                                 # modify from MonoSDFNetwork
     def __init__(self, conf):
         """
@@ -50,23 +86,10 @@ class Net(torch.nn.Module):                                                 # mo
 
         if self.use_global_encoder:
             # object bdb2d global image feature
-            self.global_encoder = nn.Sequential(
-                nn.Conv2d(in_channels=256,out_channels=64,kernel_size=3,padding=1),
-                resnet18_small_stride(pretrained=False,input_channels=64),
-                nn.Linear(2048, 1024),
-                nn.ReLU(),
-                nn.Linear(1024, 512),
-                nn.ReLU(),
-                nn.Linear(512, 256)
-            )
-        
+            self.global_encoder = GlobalEncoder().cuda()
+
         self.use_cls_encoder = conf['model']['latent_feature']['use_cls_encoder']
-        self.use_dino = conf['model']['latent_feature']['encoder']['use_dino']  # 判断是否使用DINO
-        if self.use_dino: # 初始化dino相关的学习权重和mlp
-            self.dino_weight = nn.Parameter(torch.tensor(0.1))  # 定义可训练的dino权重参数
-            self.mlp = QuickMLP()
-        
-        self.use_diffu_prior = self.config['model']['latent_feature']['encoder']['use_diffu_prior']  # 判断是否使用Diffusion Prior
+        self.use_depthStream = self.config['model']['latent_feature']['encoder']['use_depthStream']  
 
         self.latent_size = conf['model']['latent_feature']['latent_feature_dim']
         if d_latent != self.latent_size:
@@ -155,12 +178,7 @@ class Net(torch.nn.Module):                                                 # mo
             bdb_roi_feature = F.grid_sample(self.encoder.latent, bdb_grid, align_corners=True, mode='bilinear')     # [B, latent_size, 64, 64]
             global_latent = self.global_encoder(bdb_roi_feature)                        # [B, 256]
 
-            if self.use_dino:
-                D_feature = input['dino_feat'].cuda().to(torch.float32)
-                dino_feature = self.mlp(D_feature)    
-                cat_feature = (1-self.dino_weight) * global_latent + self.dino_weight * dino_feature
-            else:
-                cat_feature = global_latent
+            cat_feature = global_latent
 
         if self.use_cls_encoder:
             cls_encoder = input['cls_encoder'].cuda().to(torch.float32)             # [B, 9]
@@ -178,10 +196,10 @@ class Net(torch.nn.Module):                                                 # mo
             roi_feat=ret_dict["roi_feat"]
 
         if self.use_encoder:
-            if self.use_diffu_prior:
-                diffu_prior = input['diffu_prior']  # diffu_prior.shape = torch.Size([12, 484, 648])
+            if self.use_depthStream:
+                depth_prior = input['depth_prior']  # depth_prior.shape = torch.Size([12, 484, 648])
             latent = self.encoder.index(
-                uv, None, self.image_shape, diffu_prior, roi_feat=roi_feat
+                uv, None, self.image_shape, depth_prior, roi_feat=roi_feat
             )  # (B, latent_size, N_ray)
             if self.stop_encoder_grad:
                 latent = latent.detach()
@@ -286,12 +304,7 @@ class Net(torch.nn.Module):                                                 # mo
             bdb_roi_feature = F.grid_sample(self.encoder.latent, bdb_grid, align_corners=True, mode='bilinear')     # [B, latent_size, 64, 64]
             global_latent = self.global_encoder(bdb_roi_feature)                        # [B, 256]
 
-            if self.use_dino:
-                D_feature = input['dino_feat'].cuda().to(torch.float32)
-                dino_feature = self.mlp(D_feature)    
-                cat_feature = (1-self.dino_weight) * global_latent + self.dino_weight * dino_feature
-            else:
-                cat_feature = global_latent
+            cat_feature = global_latent
 
         if self.use_cls_encoder:
             cls_encoder = input['cls_encoder'].cuda().to(torch.float32)             # [B, 9]
@@ -315,10 +328,10 @@ class Net(torch.nn.Module):                                                 # mo
                 pred_mask = self.mask_decoder(bdb_roi_feature)                                                  # [B, 1, 64, 64]
 
         if self.use_encoder:
-            if self.use_diffu_prior:
-                diffu_prior = input['diffu_prior']  # diffu_prior.shape = torch.Size([12, 484, 648])
+            if self.use_depthStream:
+                depth_prior = input['depth_prior']  # depth_prior.shape = torch.Size([12, 484, 648])
             latent = self.encoder.index(
-                uv, None, self.image_shape, diffu_prior, roi_feat=roi_feat
+                uv, None, self.image_shape, depth_prior, roi_feat=roi_feat
             )  # (B, latent_size, N_ray)
             if self.stop_encoder_grad:
                 latent = latent.detach()
@@ -436,10 +449,8 @@ class Net(torch.nn.Module):                                                 # mo
             'ray_mask': ray_mask,
         }
 
-        if self.use_dino:
-            output["dino_weight"] = self.dino_weight        
-        if self.use_diffu_prior:
-            output['diffu_weight'] = self.encoder.diffu_weight
+        if self.use_depthStream:
+            output['depth_weight'] = self.encoder.depth_weight
             
         if self.use_instance_mask:
             output['pred_mask'] = pred_mask

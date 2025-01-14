@@ -104,7 +104,7 @@ model:
       pretrained: True
       num_layers: 3                     # latent_size=[0, 64, 128, 256, 512, 1024][num_layers], num_layers=3  ->  latent_size=256(image feature dims)
       use_dino: False                    # whether use dino strategy
-      use_diffu_prior: True             # whether use diffusion prior
+      use_depthStream: True             # whether use diffusion prior
 
   implicit_network:
     d_in: 3                             # monosdf is 3 (x,y,z)

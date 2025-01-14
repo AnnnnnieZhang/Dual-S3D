@@ -40,6 +40,7 @@ class Front3D_Recon_Dataset(Dataset):
         self.mask_filter = self.config['data']['mask_filter']
         self.bdb2d_filter = self.config['data']['bdb2d_filter']
         self.soft_pixels = self.config['data']['soft_pixels']
+        self.use_depth_prior = self.config['model']['latent_feature']['encoder']['use_depthStream']
         if mode=="train":
             classnames = self.config['data']['train_class_name']
         elif mode == 'val':
@@ -48,18 +49,21 @@ class Front3D_Recon_Dataset(Dataset):
             classnames = self.config['data']['test_class_name']
 
         dataset_name = self.config['data']['dataset']       # now, just for front3d
+        split_dir = self.config['data']['split_dir']
+
+
         if isinstance(classnames, list):
             self.multi_class = True
             self.split = []
             for class_name in classnames:
-                self.split_path = os.path.join(self.config['data']['split_dir'], dataset_name, 'split', mode, class_name + ".json")
+                self.split_path = os.path.join(split_dir, dataset_name, 'split', mode, class_name + ".json")
                 with open(self.split_path, 'rb') as f:
                     self.split += json.load(f)
         else:
             self.multi_class = False
             self.split = []
             class_name = classnames
-            self.split_path = os.path.join(self.config['data']['split_dir'], dataset_name, 'split', mode, class_name + ".json")
+            self.split_path = os.path.join(split_dir, dataset_name, 'split', mode, class_name + ".json")
             with open(self.split_path, 'r') as f:
                 self.split = json.load(f)
         # if trial, only use 200 samples
@@ -82,12 +86,28 @@ class Front3D_Recon_Dataset(Dataset):
 
         self.use_cls_encoder = self.config['model']['latent_feature']['use_cls_encoder']
 
+        if self.use_depth_prior:
+            self.depth_prior_path = 'depth_anything/'
+            self.depth_prior = None
+
     def __len__(self):
         return len(self.split)
 
     def __getitem__(self, index):
         imgid, objid, cname = self.split[index]
-        '''load the data dynamically or store them in the memory firstly'''
+
+        if self.use_depth_prior:
+            # img_name = imgid.split('/')[-1]
+            file_name = os.path.splitext(os.path.basename(imgid))[0] + '_pred.npy'  # 生成完整的文件名
+            file_path = os.path.join(self.depth_prior_path, file_name)  # 生成文件路径
+            if os.path.exists(file_path):       # 加载 .npy 文件
+                np_data = np.load(file_path)
+                torch_data = torch.from_numpy(np_data).float() # 将 numpy 数组转换为 torch 张量
+                self.depth_prior = torch_data     # torch.Size([484, 648])
+            else:
+                print(f"File {file_name} does not exist in the folder.")
+            
+
         if self.config['data']['load_dynamic'] == True:
             img_path = os.path.join(self.config['data']['data_path'], imgid)
             post_fix = img_path.split('.')[-1]      # avoid '.png' '.jpg' '.jpeg'
@@ -339,6 +359,9 @@ class Front3D_Recon_Dataset(Dataset):
             'voxel_range': voxel_range,
         }
 
+        if self.use_depth_prior:
+            sample["depth_prior"] = self.depth_prior
+
         # add bdb3d world points
         if self.add_bdb3d_points:
 
@@ -394,11 +417,14 @@ def worker_init_fn(worker_id):
     np.random.seed(base_seed + worker_id)
 
 def Front3D_Recon_dataloader(config, mode='train'):
+    batch_size = config['data']['batch_size'][mode]
+    
     dataloader = DataLoader(
-                    dataset=Front3D_Recon_Dataset(config, mode),
-                    num_workers=config['data']['num_workers'],
-                    batch_size=config['data']['batch_size'][mode],
-                    shuffle=(mode == 'train'),
-                    worker_init_fn=worker_init_fn, pin_memory=True
-                )
+        dataset=Front3D_Recon_Dataset(config, mode),
+        num_workers=config['data']['num_workers'],
+        batch_size=batch_size,
+        shuffle=(mode == 'train'),
+        worker_init_fn=worker_init_fn,
+        pin_memory=True
+    )
     return dataloader
