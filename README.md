@@ -9,31 +9,24 @@ Single-view 3D reconstruction aims to recover the complete 3D geometry and appea
 ## Workflow
 The pipeline of M3D is shown below:
 
-![M3D Reconstruction Process](readme/process.png)
+![Dual-S3D Reconstruction Process](readme/process.pdf)
 
 ---
 
 ## Results Show
 
-### Geometry Reconstruction
+### Reconstruction
 
-![M3D Geometry Compare Results](readme/compare_results.png)
+![Dual-S3D Geometry Compare Results](readme/results.pdf)
 
-### Render Reconstruction
-
-![M3D Render Results](readme/color channel compared.png)
-
-### Compose Result
-
-![M3D Compose](readme/compare_render.png)
 
 ## Prepare Start
 ### Environment Prepare
 Follow these steps to set up the environment:
 
 ```bash
-conda create -n DF3D python=3.8 
-conda activate DF3D
+conda create -n DualS3D python=3.8 
+conda activate DualS3D
 
 pip install -r requirements.txt
 ```
@@ -122,23 +115,3 @@ In preparing......
 
 
 ## Project Status
-
-This project is currently in **active development**, with continuous refinements and improvements.
-
-
-We welcome contributions and suggestions to help improve the project further!
-
----
-
-If you use this project or parts of the framework in your research, please consider citing:
-
-```bibtex
-@misc{zhang2024m3ddualstreamselectivestate,
-      title={M3D: Dual-Stream Selective State Spaces and Depth-Driven Framework for High-Fidelity Single-View 3D Reconstruction}, 
-      author={Luoxi Zhang and Pragyan Shrestha and Yu Zhou and Chun Xie and Itaru Kitahara},
-      year={2024},
-      eprint={2411.12635},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2411.12635}, 
-}
