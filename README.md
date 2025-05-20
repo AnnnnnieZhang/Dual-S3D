@@ -1,12 +1,9 @@
 # Single-view 3D Scene Reconstruction with High-fidelity Shape and Texture (M3D Framework)
 
-[![Paper PDF](https://img.shields.io/badge/Paper-PDF-red)](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://arxiv.org/pdf/2411.12635)
-[![arXiv](https://img.shields.io/badge/arXiv-2411.12635-green)](https://arxiv.org/abs/2411.12635)
-
 ---
 ## Overview
 
-M3D is a high-fidelity framework for reconstructing 3D scenes and objects from a single RGB image. This framework combines state-of-the-art dual-stream feature extraction and depth-driven methodologies to deliver superior performance in challenging scenarios, such as virtual reality, autonomous driving, and robotics.
+Single-view 3D reconstruction aims to recover the complete 3D geometry and appearance of objects from a single RGB image and its corresponding camera parameters. Yet, the task remains challenging due to incomplete image information and inherent ambiguity. Existing methods primarily encounter two issues: balancing extracting local details with the construction of global topology and the interference caused by the early fusion of RGB and depth features in high-texture regions, destabilizing SDF optimization. We propose Dual-S3D, a novel single-view 3D reconstruction framework to address these challenges. Our method employs a hierarchical dual-path feature extraction strategy based on stages that utilize CNNs to anchor local geometric details.
 
 ---
 ## Workflow
