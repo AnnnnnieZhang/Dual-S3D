@@ -1,4 +1,4 @@
-# Single-view 3D Scene Reconstruction with High-fidelity Shape and Texture (M3D Framework)
+# Single-view 3D Scene Reconstruction with High-fidelity Shape and Texture (Dual-S3D Framework)
 
 ---
 ## Overview
@@ -7,9 +7,12 @@ Single-view 3D reconstruction aims to recover the complete 3D geometry and appea
 
 ---
 ## Workflow
-The pipeline of M3D is shown below:
+The pipeline of Dual-S3D is shown below:
 
-![Dual-S3D Reconstruction Process](readme/process.pdf)
+![Dual-S3D Reconstruction Process](readme/process.png)
+
+The pipeline of Mixer is shown below:
+![Dual-S3D Reconstruction Process](readme/mixer.png)
 
 ---
 
@@ -17,7 +20,7 @@ The pipeline of M3D is shown below:
 
 ### Reconstruction
 
-![Dual-S3D Geometry Compare Results](readme/results.pdf)
+![Dual-S3D Compared Results](readme/results.png)
 
 
 ## Prepare Start
